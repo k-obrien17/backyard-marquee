@@ -79,6 +79,14 @@ export default function EditLineup() {
     }
   };
 
+  const moveArtist = (index, direction) => {
+    const newIndex = index + direction;
+    if (newIndex < 0 || newIndex >= lineup.length) return;
+    const newLineup = [...lineup];
+    [newLineup[index], newLineup[newIndex]] = [newLineup[newIndex], newLineup[index]];
+    setLineup(newLineup);
+  };
+
   const isLineupFull = lineup.every((slot) => slot !== null);
   const hasArtists = lineup.some((slot) => slot !== null);
 
@@ -174,6 +182,10 @@ export default function EditLineup() {
                     artist={artist}
                     onRemove={() => removeArtist(index)}
                     onNoteChange={(note) => updateNote(index, note)}
+                    onMoveUp={() => moveArtist(index, -1)}
+                    onMoveDown={() => moveArtist(index, 1)}
+                    isFirst={index === 0}
+                    isLast={index === lineup.length - 1}
                   />
                 ))}
               </div>

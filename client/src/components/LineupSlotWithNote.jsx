@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-export default function LineupSlotWithNote({ position, artist, onRemove, onNoteChange }) {
+export default function LineupSlotWithNote({ position, artist, onRemove, onNoteChange, onMoveUp, onMoveDown, isFirst, isLast }) {
   const slotLabels = ['Going first', 'Second', 'Third', 'Fourth', 'Going last'];
   const [showNote, setShowNote] = useState(false);
 
@@ -44,6 +44,22 @@ export default function LineupSlotWithNote({ position, artist, onRemove, onNoteC
             >
               {artist.note ? 'Edit note' : '+ Add note'}
             </button>
+            <div className="flex flex-col gap-1">
+              <button
+                onClick={onMoveUp}
+                disabled={isFirst}
+                className="w-6 h-6 rounded bg-white/10 text-gray-400 hover:bg-white/20 transition flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                ↑
+              </button>
+              <button
+                onClick={onMoveDown}
+                disabled={isLast}
+                className="w-6 h-6 rounded bg-white/10 text-gray-400 hover:bg-white/20 transition flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                ↓
+              </button>
+            </div>
             <button
               onClick={onRemove}
               className="w-8 h-8 rounded-full bg-red-500/20 text-red-400 hover:bg-red-500/40 transition flex items-center justify-center"
