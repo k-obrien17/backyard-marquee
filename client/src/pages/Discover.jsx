@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { stats } from '../api/client';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 
 export default function Discover() {
   const [lineups, setLineups] = useState([]);
@@ -148,40 +149,45 @@ export default function Discover() {
                 <Link
                   key={lineup.id}
                   to={`/lineup/${lineup.id}`}
-                  className="bg-black/30 backdrop-blur-lg rounded-2xl p-6 border border-white/10 hover:border-pink-500/50 transition group"
+                  className="group relative"
                 >
-                  <h3 className="text-xl font-semibold mb-2 group-hover:text-pink-400 transition">
-                    {lineup.title}
-                  </h3>
-                  {lineup.description && (
-                    <p className="text-gray-400 text-sm mb-3 italic line-clamp-2">
-                      "{lineup.description}"
-                    </p>
-                  )}
-                  <p className="text-gray-500 text-sm mb-4">
-                    {new Date(lineup.created_at).toLocaleDateString()}
-                  </p>
+                  {/* Glow effect on hover */}
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-pink-500 to-purple-500 rounded-2xl opacity-0 group-hover:opacity-50 blur transition duration-300"></div>
 
-                  <div className="space-y-2">
-                    {lineup.artists.map((artist, index) => (
-                      <div key={index} className="flex items-center gap-3">
-                        <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                          index === 0 ? 'bg-yellow-500/30 text-yellow-400' :
-                          index === 1 ? 'bg-pink-500/30 text-pink-400' :
-                          'bg-white/10 text-gray-400'
-                        }`}>
-                          {index + 1}
-                        </span>
-                        <span className={`flex-1 ${index < 2 ? 'font-medium' : 'text-gray-400'}`}>
-                          {artist.artist_name}
-                        </span>
-                        {artist.note && (
-                          <span className="text-purple-400 text-xs" title="Has a note">
-                            💬
+                  <div className="relative bg-gray-900/90 backdrop-blur-lg rounded-2xl p-6 border border-white/10 group-hover:border-white/20 transition duration-300">
+                    <h3 className="text-xl font-semibold mb-2 group-hover:text-pink-400 transition">
+                      {lineup.title}
+                    </h3>
+                    {lineup.description && (
+                      <p className="text-gray-400 text-sm mb-3 italic line-clamp-2">
+                        "{lineup.description}"
+                      </p>
+                    )}
+                    <p className="text-gray-500 text-sm mb-4">
+                      {new Date(lineup.created_at).toLocaleDateString()}
+                    </p>
+
+                    <div className="space-y-2">
+                      {lineup.artists.map((artist, index) => (
+                        <div key={index} className="flex items-center gap-3">
+                          <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                            index === 0 ? 'bg-yellow-500/30 text-yellow-400' :
+                            index === 1 ? 'bg-pink-500/30 text-pink-400' :
+                            'bg-white/10 text-gray-400'
+                          }`}>
+                            {index + 1}
                           </span>
-                        )}
-                      </div>
-                    ))}
+                          <span className={`flex-1 ${index < 2 ? 'font-medium' : 'text-gray-400'}`}>
+                            {artist.artist_name}
+                          </span>
+                          {artist.note && (
+                            <span className="text-purple-400 text-xs" title="Has a note">
+                              💬
+                            </span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </Link>
               ))}
@@ -210,6 +216,8 @@ export default function Discover() {
           </>
         )}
       </div>
+
+      <Footer />
     </div>
   );
 }

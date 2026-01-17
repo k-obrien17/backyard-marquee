@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { stats } from '../api/client';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 
 export default function Leaderboard() {
   const [artists, setArtists] = useState([]);
@@ -75,43 +76,54 @@ export default function Leaderboard() {
                   <Link
                     key={artist.artist_name}
                     to={`/artist/${encodeURIComponent(artist.artist_name)}`}
-                    className="flex items-center gap-4 bg-black/30 backdrop-blur-lg rounded-xl p-4 border border-white/10 hover:border-pink-500/50 transition group"
+                    className="group relative block"
                   >
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg ${
-                      rank <= 3 ? 'bg-gradient-to-r from-yellow-400 to-orange-500' : 'bg-white/20'
-                    }`}>
-                      {rank}
-                    </div>
-
-                    {artist.artist_image ? (
-                      <img
-                        src={artist.artist_image}
-                        alt={artist.artist_name}
-                        className="w-16 h-16 rounded-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-16 h-16 rounded-full bg-gray-700 flex items-center justify-center text-2xl">
-                        🎵
-                      </div>
+                    {/* Glow effect for top 3 */}
+                    {rank <= 3 && (
+                      <div className="absolute -inset-0.5 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-xl opacity-30 group-hover:opacity-60 blur transition duration-300"></div>
+                    )}
+                    {/* Regular glow for others */}
+                    {rank > 3 && (
+                      <div className="absolute -inset-0.5 bg-gradient-to-r from-pink-500 to-purple-500 rounded-xl opacity-0 group-hover:opacity-40 blur transition duration-300"></div>
                     )}
 
-                    <div className="flex-1">
-                      <h3 className="text-xl font-semibold group-hover:text-pink-400 transition">
-                        {artist.artist_name}
-                      </h3>
-                      <div className="flex items-center gap-4 text-sm text-gray-400">
-                        <span>{artist.lineup_count} lineup{artist.lineup_count !== 1 ? 's' : ''}</span>
-                        <span>•</span>
-                        <span>{artist.headliner_count}x going first</span>
+                    <div className="relative flex items-center gap-4 bg-gray-900/90 backdrop-blur-lg rounded-xl p-4 border border-white/10 group-hover:border-white/20 transition">
+                      <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg ${
+                        rank <= 3 ? 'bg-gradient-to-r from-yellow-400 to-orange-500 shadow-lg shadow-yellow-500/30' : 'bg-white/20'
+                      }`}>
+                        {rank}
                       </div>
-                    </div>
 
-                    <div className={`px-3 py-1 rounded-full text-sm font-medium bg-gradient-to-r ${badge.color}`}>
-                      {badge.label}
-                    </div>
+                      {artist.artist_image ? (
+                        <img
+                          src={artist.artist_image}
+                          alt={artist.artist_name}
+                          className="w-16 h-16 rounded-full object-cover ring-2 ring-white/10"
+                        />
+                      ) : (
+                        <div className="w-16 h-16 rounded-full bg-gray-700 flex items-center justify-center text-2xl ring-2 ring-white/10">
+                          🎵
+                        </div>
+                      )}
 
-                    <div className="text-gray-500 group-hover:text-pink-400 transition">
-                      →
+                      <div className="flex-1">
+                        <h3 className="text-xl font-semibold group-hover:text-pink-400 transition">
+                          {artist.artist_name}
+                        </h3>
+                        <div className="flex items-center gap-4 text-sm text-gray-400">
+                          <span>{artist.lineup_count} lineup{artist.lineup_count !== 1 ? 's' : ''}</span>
+                          <span>•</span>
+                          <span>{artist.headliner_count}x going first</span>
+                        </div>
+                      </div>
+
+                      <div className={`px-3 py-1 rounded-full text-sm font-medium bg-gradient-to-r ${badge.color} shadow-lg`}>
+                        {badge.label}
+                      </div>
+
+                      <div className="text-gray-500 group-hover:text-pink-400 transition">
+                        →
+                      </div>
                     </div>
                   </Link>
                 );
@@ -141,6 +153,8 @@ export default function Leaderboard() {
           </>
         )}
       </div>
+
+      <Footer />
     </div>
   );
 }
