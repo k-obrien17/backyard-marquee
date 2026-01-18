@@ -61,7 +61,7 @@ export default function Navbar() {
             </button>
             {user ? (
               <>
-                <span className="text-gray-400 text-sm">{user.email}</span>
+                <span className="text-gray-400 text-sm">@{user.username}</span>
                 <button
                   onClick={logout}
                   className="text-gray-400 hover:text-white transition text-sm"
@@ -147,7 +147,7 @@ export default function Navbar() {
             <div className="border-t border-white/10 pt-4 mt-4 px-4">
               {user ? (
                 <div className="space-y-2">
-                  <p className="text-gray-400 text-sm">{user.email}</p>
+                  <p className="text-gray-400 text-sm">@{user.username}</p>
                   <button
                     onClick={() => { logout(); setMobileMenuOpen(false); }}
                     className="text-gray-400 hover:text-white transition text-sm"

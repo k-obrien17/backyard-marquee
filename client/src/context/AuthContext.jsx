@@ -9,32 +9,32 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    const email = localStorage.getItem('userEmail');
-    if (token && email) {
-      setUser({ email });
+    const username = localStorage.getItem('username');
+    if (token && username) {
+      setUser({ username });
     }
     setLoading(false);
   }, []);
 
-  const login = async (email, password) => {
-    const res = await auth.login(email, password);
+  const login = async (username, password) => {
+    const res = await auth.login(username, password);
     localStorage.setItem('token', res.data.token);
-    localStorage.setItem('userEmail', email);
-    setUser({ email });
+    localStorage.setItem('username', res.data.user.username);
+    setUser({ username: res.data.user.username });
     return res.data;
   };
 
-  const register = async (email, password) => {
-    const res = await auth.register(email, password);
+  const register = async (username, password, email) => {
+    const res = await auth.register(username, password, email);
     localStorage.setItem('token', res.data.token);
-    localStorage.setItem('userEmail', email);
-    setUser({ email });
+    localStorage.setItem('username', res.data.user.username);
+    setUser({ username: res.data.user.username });
     return res.data;
   };
 
   const logout = () => {
     localStorage.removeItem('token');
-    localStorage.removeItem('userEmail');
+    localStorage.removeItem('username');
     setUser(null);
   };
 

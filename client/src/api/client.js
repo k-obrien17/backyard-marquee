@@ -13,8 +13,8 @@ api.interceptors.request.use((config) => {
 });
 
 export const auth = {
-  register: (email, password) => api.post('/auth/register', { email, password }),
-  login: (email, password) => api.post('/auth/login', { email, password }),
+  register: (username, password, email) => api.post('/auth/register', { username, password, email }),
+  login: (username, password) => api.post('/auth/login', { username, password }),
 };
 
 export const artists = {
