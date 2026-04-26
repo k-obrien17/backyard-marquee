@@ -3,9 +3,10 @@
 
 # Track Claude config
 !.gitignore
+!CLAUDE.md
+!AGENTS.md
 !.claude/
 .claude/*
-!.claude/CLAUDE.md
 !.claude/OPS-MANUAL.md
 
 # Track app source
