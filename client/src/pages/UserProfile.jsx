@@ -64,7 +64,7 @@ export default function UserProfile() {
           </div>
           <h1 className="text-4xl font-bold uppercase tracking-tight mb-2">@{profile.username}</h1>
           <p className="text-gray-500 uppercase text-sm">
-            {profile.lineup_count} LINEUP{profile.lineup_count !== 1 ? 'S' : ''} &middot; JOINED {new Date(profile.created_at).toLocaleDateString()}
+            {profile.lineup_count} LINEUP{profile.lineup_count !== 1 ? 'S' : ''} &middot; JOINED {profile.joined_label}
           </p>
         </div>
 

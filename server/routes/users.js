@@ -42,9 +42,20 @@ router.get('/:username', async (req, res) => {
       tags: JSON.parse(l.tags || '[]').filter(t => t !== null)
     }));
 
+    // Coarsen the join date to "Mon YYYY" so public profiles can't be used
+    // to correlate exact registration timestamps across users. Send a
+    // pre-formatted label so the client doesn't have to special-case parsing.
+    let joinedLabel = null;
+    if (user.created_at) {
+      const d = new Date(String(user.created_at).replace(' ', 'T') + 'Z');
+      if (!isNaN(d.getTime())) {
+        joinedLabel = d.toLocaleString('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' });
+      }
+    }
+
     res.json({
       username: user.username,
-      created_at: user.created_at,
+      joined_label: joinedLabel,
       lineup_count: parsed.length,
       lineups: parsed
     });
