@@ -69,6 +69,12 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// JSON 404 — replaces Express's default HTML "Cannot GET /..." which both
+// reflected the requested URL and revealed the framework.
+app.use((req, res) => {
+  res.status(404).json({ error: 'Not found' });
+});
+
 // Global error handler — prevent stack trace leaks
 app.use((err, req, res, next) => {
   console.error(err);
