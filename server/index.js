@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 
 import authRoutes from './routes/auth.js';
 import lineupsRoutes from './routes/lineups.js';
@@ -12,6 +13,17 @@ import db, { initDatabase } from './db/index.js';
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Trust the platform proxy (Render terminates TLS upstream) so req.ip and
+// rate-limit keys reflect real client IPs instead of the proxy.
+app.set('trust proxy', 1);
+
+app.use(helmet({
+  // API serves JSON and a tiny crawler-only HTML response — the default CSP
+  // would block both Spotify image hosts and inline OG markup. Skip it; the
+  // SPA's CSP belongs at the frontend layer.
+  contentSecurityPolicy: false,
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+}));
 app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:5173',
 }));
