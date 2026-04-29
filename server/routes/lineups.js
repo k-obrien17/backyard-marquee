@@ -7,7 +7,13 @@ import { authenticateToken, optionalAuth, generateToken, JWT_SECRET } from '../m
 
 const router = Router();
 
-const createLimiter = rateLimit({ windowMs: 60 * 60 * 1000, max: 20, message: { error: 'Too many lineups created, try again later' } });
+// Authenticated users get a generous create limit; anonymous (no token) hits
+// a much tighter ceiling because each anon create also spawns a guest user row.
+const createLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: (req) => (req.user ? 20 : 5),
+  message: { error: 'Too many lineups created, try again later' },
+});
 const commentLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 20, message: { error: 'Too many comments, try again later' } });
 const likeLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 60, message: { error: 'Too many likes, try again later' } });
 
@@ -116,6 +122,12 @@ async function insertTags(lineupId, tags) {
 
 // Create lineup (authenticated or anonymous — guest account created on the fly)
 router.post('/', optionalAuth, createLimiter, async (req, res) => {
+  // Honeypot: real users never see this field, so a populated _hp is a bot.
+  // Return a fake-success shape so naive scrapers think they succeeded and stop.
+  if (req.body && typeof req.body._hp === 'string' && req.body._hp.length > 0) {
+    return res.status(201).json({ id: 0, title: '', is_public: 0 });
+  }
+
   const { is_public, artists, tags } = req.body;
   const title = sanitize(req.body.title, 100);
   const description = sanitize(req.body.description, 500);

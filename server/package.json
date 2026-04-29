@@ -4,7 +4,9 @@
   "type": "module",
   "scripts": {
     "dev": "node --watch index.js",
-    "start": "node index.js"
+    "start": "node index.js",
+    "reap-guests": "node scripts/reap-guest-users.js",
+    "reap-guests:commit": "node scripts/reap-guest-users.js --commit"
   },
   "dependencies": {
     "@libsql/client": "^0.14.0",
