@@ -100,7 +100,10 @@ router.get('/:id', async (req, res) => {
     const tagRows = await db.all('SELECT tag FROM lineup_tags WHERE lineup_id = ?', req.params.id);
     const tags = tagRows.map(r => r.tag);
 
-    res.json({ ...lineup, artists, tags });
+    // Hide internal numeric user_id from public responses; expose is_owner so
+    // the client can decide whether to show edit/delete affordances.
+    const { user_id, ...lineupPublic } = lineup;
+    res.json({ ...lineupPublic, is_owner: user_id === userId, artists, tags });
   } catch (err) {
     console.error('Get lineup error:', err);
     res.status(500).json({ error: 'Failed to get lineup' });
@@ -278,15 +281,22 @@ router.get('/:id/likes', async (req, res) => {
 });
 
 // Get comments for a lineup
-router.get('/:id/comments', async (req, res) => {
+router.get('/:id/comments', optionalAuth, async (req, res) => {
   try {
-    const comments = await db.all(`
+    const rows = await db.all(`
       SELECT c.id, c.content, c.created_at, c.user_id, u.username
       FROM lineup_comments c
       JOIN users u ON c.user_id = u.id
       WHERE c.lineup_id = ?
       ORDER BY c.created_at ASC
     `, req.params.id);
+    const myId = req.user?.id ?? null;
+    // Strip internal user_id, expose is_own_comment so the client knows whether
+    // to show the delete button without learning anyone else's numeric ID.
+    const comments = rows.map(({ user_id, ...rest }) => ({
+      ...rest,
+      is_own_comment: user_id === myId,
+    }));
     res.json(comments);
   } catch (err) {
     console.error('Get comments error:', err);
@@ -302,13 +312,14 @@ router.post('/:id/comments', authenticateToken, commentLimiter, async (req, res)
   }
   try {
     const result = await db.run('INSERT INTO lineup_comments (lineup_id, user_id, content) VALUES (?, ?, ?)', req.params.id, req.user.id, content);
-    const comment = await db.get(`
+    const row = await db.get(`
       SELECT c.id, c.content, c.created_at, c.user_id, u.username
       FROM lineup_comments c
       JOIN users u ON c.user_id = u.id
       WHERE c.id = ?
     `, result.lastInsertRowid);
-    res.status(201).json(comment);
+    const { user_id, ...comment } = row;
+    res.status(201).json({ ...comment, is_own_comment: true });
   } catch (err) {
     console.error('Add comment error:', err);
     res.status(500).json({ error: 'Failed to add comment' });

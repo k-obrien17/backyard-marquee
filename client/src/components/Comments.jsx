@@ -56,7 +56,7 @@ export default function Comments({ lineupId }) {
                     {new Date(comment.created_at).toLocaleDateString()}
                   </span>
                 </div>
-                {user && user.id === comment.user_id && (
+                {comment.is_own_comment && (
                   <button onClick={() => handleDelete(comment.id)} className="text-gray-600 hover:text-white text-xs uppercase">
                     DELETE
                   </button>
