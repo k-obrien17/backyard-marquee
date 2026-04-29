@@ -33,12 +33,22 @@ router.post('/register', authLimiter, async (req, res) => {
           decoded.id, 'guest'
         );
         if (guestUser) {
-          const conflict = await db.get(
-            'SELECT 1 FROM users WHERE (username = ? OR email = ?) AND id != ?',
-            username, email, guestUser.id
+          // Usernames are public (visible via /api/users/:username), so leaking
+          // a "taken" signal here is fine. Emails are private — return a generic
+          // error to avoid account enumeration.
+          const usernameTaken = await db.get(
+            'SELECT 1 FROM users WHERE username = ? AND id != ?',
+            username, guestUser.id
           );
-          if (conflict) {
-            return res.status(409).json({ error: 'Username or email already taken' });
+          if (usernameTaken) {
+            return res.status(409).json({ error: 'Username already taken' });
+          }
+          const emailTaken = await db.get(
+            'SELECT 1 FROM users WHERE email = ? AND id != ?',
+            email, guestUser.id
+          );
+          if (emailTaken) {
+            return res.status(400).json({ error: 'Registration failed. Please try again.' });
           }
 
           const hash = await bcrypt.hash(password, 10);
@@ -56,12 +66,16 @@ router.post('/register', authLimiter, async (req, res) => {
       }
     }
 
-    const existing = await db.get(
-      'SELECT 1 FROM users WHERE username = ? OR email = ?',
-      username, email
-    );
-    if (existing) {
-      return res.status(409).json({ error: 'Username or email already taken' });
+    // Split duplicate detection: username conflicts get a specific error
+    // (usernames are public via /api/users/:username so no info is leaked),
+    // email conflicts get a generic error to prevent account enumeration.
+    const usernameTaken = await db.get('SELECT 1 FROM users WHERE username = ?', username);
+    if (usernameTaken) {
+      return res.status(409).json({ error: 'Username already taken' });
+    }
+    const emailTaken = await db.get('SELECT 1 FROM users WHERE email = ?', email);
+    if (emailTaken) {
+      return res.status(400).json({ error: 'Registration failed. Please try again.' });
     }
 
     const hash = await bcrypt.hash(password, 10);
