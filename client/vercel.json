@@ -1,5 +1,16 @@
 {
   "rewrites": [
+    {
+      "source": "/lineup/:id",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(?i).*(bot|crawl|spider|slurp|facebookexternalhit|twitterbot|linkedinbot|whatsapp|discordbot|telegrambot|preview|embed|skype|pinterest).*"
+        }
+      ],
+      "destination": "/api/lineup-og?id=:id"
+    },
     { "source": "/(.*)", "destination": "/" }
   ]
 }
