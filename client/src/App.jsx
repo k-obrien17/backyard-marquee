@@ -11,6 +11,8 @@ import ArtistDetail from './pages/ArtistDetail';
 import Discover from './pages/Discover';
 import EditLineup from './pages/EditLineup';
 import UserProfile from './pages/UserProfile';
+import Privacy from './pages/Privacy';
+import Terms from './pages/Terms';
 
 function App() {
   return (
@@ -29,6 +31,8 @@ function App() {
           <Route path="/artist/:name" element={<ArtistDetail />} />
           <Route path="/discover" element={<Discover />} />
           <Route path="/user/:username" element={<UserProfile />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

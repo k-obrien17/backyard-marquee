@@ -65,9 +65,11 @@ export default function Footer() {
           <p className="text-gray-500 text-sm uppercase">
             {new Date().getFullYear()} BACKYARD MARQUEE
           </p>
-          <p className="text-gray-600 text-xs uppercase">
-            Artist data powered by Spotify
-          </p>
+          <div className="flex gap-4 text-xs uppercase">
+            <Link to="/privacy" className="text-gray-600 hover:text-white transition">Privacy</Link>
+            <Link to="/terms" className="text-gray-600 hover:text-white transition">Terms</Link>
+            <span className="text-gray-700">Artist data powered by Spotify</span>
+          </div>
         </div>
       </div>
     </footer>
