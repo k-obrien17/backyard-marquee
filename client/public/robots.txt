@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /create
+Disallow: /edit/
+Disallow: /my-lineups
+Disallow: /login
+Disallow: /register
+
+Sitemap: https://backyardmarquee.thediffraction.com/sitemap.xml
