@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { stats } from '../api/client';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 
 export default function Discover() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [lineups, setLineups] = useState([]);
   const [siteStats, setSiteStats] = useState(null);
   const [allTags, setAllTags] = useState([]);
@@ -188,10 +189,21 @@ export default function Discover() {
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {lineups.map(lineup => (
-                <Link
+                // Outer wrapper is a div, not a Link, because the card contains
+                // a separate Link to the creator's profile. Nested <a> elements
+                // are invalid HTML and can swallow inner taps on iOS Safari.
+                <div
                   key={lineup.id}
-                  to={`/lineup/${lineup.id}`}
-                  className="group border-2 border-white/50 hover:border-white transition"
+                  role="link"
+                  tabIndex={0}
+                  onClick={() => navigate(`/lineup/${lineup.id}`)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      navigate(`/lineup/${lineup.id}`);
+                    }
+                  }}
+                  className="group border-2 border-white/50 hover:border-white transition cursor-pointer"
                 >
                   <div className="p-6">
                     <h3 className="text-xl font-bold mb-2 uppercase group-hover:text-gray-300 transition">
@@ -236,7 +248,7 @@ export default function Discover() {
                       </div>
                     )}
                   </div>
-                </Link>
+                </div>
               ))}
             </div>
 
