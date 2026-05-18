@@ -7,7 +7,7 @@ export default function Terms() {
       <Navbar />
       <main className="container mx-auto px-4 py-16 max-w-3xl flex-1">
         <h1 className="text-4xl md:text-5xl font-bold uppercase tracking-tight mb-2">Terms</h1>
-        <p className="text-gray-500 uppercase text-sm tracking-wide mb-12">Last updated April 2026</p>
+        <p className="text-gray-500 uppercase text-sm tracking-wide mb-12">Last updated May 2026</p>
 
         <section className="space-y-8 text-gray-300 leading-relaxed">
           <div>
@@ -15,6 +15,15 @@ export default function Terms() {
             <p>
               Backyard Marquee is a free hobby site for building and sharing imaginary concert
               lineups. Use it, have fun, do not abuse it.
+            </p>
+          </div>
+
+          <div>
+            <h2 className="text-2xl font-bold uppercase tracking-wide text-white mb-3">Who can use it</h2>
+            <p>
+              You must be at least 13 years old to create an account. If you are under 13, please
+              do not sign up — we are not built to handle data from kids and US law (COPPA) does
+              not let us collect it.
             </p>
           </div>
 
