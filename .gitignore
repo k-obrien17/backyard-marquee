@@ -5,6 +5,7 @@
 !.gitignore
 !CLAUDE.md
 !AGENTS.md
+!RUNBOOK.md
 !.claude/
 .claude/*
 !.claude/OPS-MANUAL.md
