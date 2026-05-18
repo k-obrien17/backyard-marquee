@@ -246,7 +246,7 @@ export default function ViewLineup() {
             {/* Footer */}
             <div className="border-t-4 border-white p-4">
               <p className="text-gray-600 text-xs uppercase tracking-widest text-center">
-                backyard-marquee.vercel.app
+                backyardmarquee.thediffraction.com
               </p>
             </div>
           </div>
