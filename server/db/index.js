@@ -22,6 +22,36 @@ const db = {
   async exec(sql) {
     await client.executeMultiple(sql);
   },
+  // Runs fn inside a write transaction. The callback receives a runner with
+  // the same get/all/run shape, scoped to the transaction. Commits on success,
+  // rolls back on any throw — prevents the half-written lineup case where a
+  // crash between DELETE FROM lineup_artists and the re-INSERTs would leave a
+  // user with an empty lineup.
+  async transaction(fn) {
+    const tx = await client.transaction('write');
+    try {
+      const runner = {
+        async get(sql, ...params) {
+          const r = await tx.execute({ sql, args: params });
+          return r.rows[0] || null;
+        },
+        async all(sql, ...params) {
+          const r = await tx.execute({ sql, args: params });
+          return r.rows;
+        },
+        async run(sql, ...params) {
+          const r = await tx.execute({ sql, args: params });
+          return { lastInsertRowid: Number(r.lastInsertRowid), changes: r.rowsAffected };
+        },
+      };
+      const result = await fn(runner);
+      await tx.commit();
+      return result;
+    } catch (err) {
+      await tx.rollback();
+      throw err;
+    }
+  },
 };
 
 export async function initDatabase() {

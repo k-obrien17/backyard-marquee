@@ -110,15 +110,16 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Sanitize and insert tags for a lineup
-async function insertTags(lineupId, tags) {
+// Sanitize and insert tags for a lineup. Accepts a runner (either db or a
+// transaction handle) so the helper can participate in atomic writes.
+async function insertTags(runner, lineupId, tags) {
   if (!Array.isArray(tags)) return;
   const seen = new Set();
   for (const raw of tags.slice(0, 5)) {
     const tag = String(raw).toLowerCase().replace(/[^a-z0-9\- ]/g, '').trim().slice(0, 30);
     if (tag && !seen.has(tag)) {
       seen.add(tag);
-      await db.run('INSERT OR IGNORE INTO lineup_tags (lineup_id, tag) VALUES (?, ?)', lineupId, tag);
+      await runner.run('INSERT OR IGNORE INTO lineup_tags (lineup_id, tag) VALUES (?, ?)', lineupId, tag);
     }
   }
 }
@@ -146,36 +147,39 @@ router.post('/', optionalAuth, createLimiter, async (req, res) => {
   try {
     let claimToken = null;
 
-    if (!req.user) {
-      const guestTag = crypto.randomBytes(4).toString('hex');
-      const guestUsername = `guest_${guestTag}`;
-      const guestResult = await db.run(
-        'INSERT INTO users (username, password_hash) VALUES (?, ?)',
-        guestUsername, 'guest'
-      );
-      req.user = { id: guestResult.lastInsertRowid };
-      claimToken = generateToken({ id: guestResult.lastInsertRowid, email: null });
-    }
+    const { lineupId } = await db.transaction(async (tx) => {
+      if (!req.user) {
+        const guestTag = crypto.randomBytes(4).toString('hex');
+        const guestUsername = `guest_${guestTag}`;
+        const guestResult = await tx.run(
+          'INSERT INTO users (username, password_hash) VALUES (?, ?)',
+          guestUsername, 'guest'
+        );
+        req.user = { id: guestResult.lastInsertRowid };
+        claimToken = generateToken({ id: guestResult.lastInsertRowid, email: null });
+      }
 
-    const result = await db.run('INSERT INTO lineups (user_id, title, description, is_public) VALUES (?, ?, ?, ?)', req.user.id, title, description || null, is_public ? 1 : 0);
-    const lineupId = result.lastInsertRowid;
+      const result = await tx.run('INSERT INTO lineups (user_id, title, description, is_public) VALUES (?, ?, ?, ?)', req.user.id, title, description || null, is_public ? 1 : 0);
+      const newId = result.lastInsertRowid;
 
-    for (const artist of artists) {
-      await db.run(
-        `INSERT INTO lineup_artists (lineup_id, slot_position, artist_name, artist_image, artist_mbid, artist_spotify_id, artist_spotify_url, note)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-        lineupId,
-        artist.slot_position,
-        artist.artist_name,
-        artist.artist_image || null,
-        artist.artist_mbid || null,
-        artist.artist_spotify_id || null,
-        artist.artist_spotify_url || null,
-        sanitize(artist.note, 300) || null
-      );
-    }
+      for (const artist of artists) {
+        await tx.run(
+          `INSERT INTO lineup_artists (lineup_id, slot_position, artist_name, artist_image, artist_mbid, artist_spotify_id, artist_spotify_url, note)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+          newId,
+          artist.slot_position,
+          artist.artist_name,
+          artist.artist_image || null,
+          artist.artist_mbid || null,
+          artist.artist_spotify_id || null,
+          artist.artist_spotify_url || null,
+          sanitize(artist.note, 300) || null
+        );
+      }
 
-    await insertTags(lineupId, tags);
+      await insertTags(tx, newId, tags);
+      return { lineupId: newId };
+    });
 
     const response = { id: lineupId, title, description, is_public };
     if (claimToken) response.claimToken = claimToken;
@@ -211,30 +215,30 @@ router.put('/:id', authenticateToken, async (req, res) => {
       return res.status(403).json({ error: 'Not authorized to edit this lineup' });
     }
 
-    // Update lineup
-    await db.run('UPDATE lineups SET title = ?, description = ?, is_public = ? WHERE id = ?', title, description || null, is_public ? 1 : 0, req.params.id);
+    // Wrap the edit in a transaction. Without this, a crash between the
+    // DELETE and the re-INSERTs leaves the lineup empty — silent data loss.
+    await db.transaction(async (tx) => {
+      await tx.run('UPDATE lineups SET title = ?, description = ?, is_public = ? WHERE id = ?', title, description || null, is_public ? 1 : 0, req.params.id);
 
-    // Delete old artists and insert new ones
-    await db.run('DELETE FROM lineup_artists WHERE lineup_id = ?', req.params.id);
+      await tx.run('DELETE FROM lineup_artists WHERE lineup_id = ?', req.params.id);
+      for (const artist of artists) {
+        await tx.run(
+          `INSERT INTO lineup_artists (lineup_id, slot_position, artist_name, artist_image, artist_mbid, artist_spotify_id, artist_spotify_url, note)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+          req.params.id,
+          artist.slot_position,
+          artist.artist_name,
+          artist.artist_image || null,
+          artist.artist_mbid || null,
+          artist.artist_spotify_id || null,
+          artist.artist_spotify_url || null,
+          sanitize(artist.note, 300) || null
+        );
+      }
 
-    for (const artist of artists) {
-      await db.run(
-        `INSERT INTO lineup_artists (lineup_id, slot_position, artist_name, artist_image, artist_mbid, artist_spotify_id, artist_spotify_url, note)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-        req.params.id,
-        artist.slot_position,
-        artist.artist_name,
-        artist.artist_image || null,
-        artist.artist_mbid || null,
-        artist.artist_spotify_id || null,
-        artist.artist_spotify_url || null,
-        sanitize(artist.note, 300) || null
-      );
-    }
-
-    // Delete old tags and insert new ones
-    await db.run('DELETE FROM lineup_tags WHERE lineup_id = ?', req.params.id);
-    await insertTags(req.params.id, tags);
+      await tx.run('DELETE FROM lineup_tags WHERE lineup_id = ?', req.params.id);
+      await insertTags(tx, req.params.id, tags);
+    });
 
     res.json({ id: req.params.id, title, description, is_public });
   } catch (err) {
