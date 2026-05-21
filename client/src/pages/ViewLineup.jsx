@@ -57,7 +57,9 @@ export default function ViewLineup() {
 
   const handleLike = async () => {
     if (!user) {
-      navigate('/login');
+      // A cold visitor who taps LIKE is a brand-new user, not a returning one;
+      // send them to register rather than silently bouncing to the login wall.
+      navigate('/register');
       return;
     }
     try {
@@ -102,9 +104,32 @@ export default function ViewLineup() {
   };
 
   if (loading) {
+    // Skeleton poster instead of a blank "LOADING..." screen. The API runs on a
+    // free tier that cold-starts (~20-30s); a shared link should show the poster
+    // frame immediately, not a black void that reads as broken.
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-white text-xl uppercase tracking-wide">LOADING...</div>
+      <div className="min-h-screen bg-black text-white">
+        <Navbar />
+        <div className="container mx-auto px-4 py-8">
+          <div className="max-w-2xl mx-auto">
+            <div className="border-4 border-white bg-black animate-pulse" aria-hidden="true">
+              <div className="border-b-4 border-white p-6 text-center">
+                <div className="h-3 w-40 bg-white/20 mx-auto mb-4" />
+                <div className="h-10 w-3/4 bg-white/30 mx-auto" />
+              </div>
+              <div className="p-6 space-y-4">
+                {[0, 1, 2, 3, 4].map(i => (
+                  <div key={i} className="flex items-center gap-4 py-2">
+                    <div className="w-8 h-4 bg-white/15" />
+                    <div className="w-12 h-12 bg-white/15" />
+                    <div className="h-6 flex-1 bg-white/20" />
+                  </div>
+                ))}
+              </div>
+            </div>
+            <p className="sr-only">Loading lineup…</p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -113,11 +138,16 @@ export default function ViewLineup() {
     return (
       <div className="min-h-screen bg-black text-white">
         <Navbar />
-        <div className="flex flex-col items-center justify-center py-32">
-          <p className="text-white text-xl mb-4 uppercase">{error}</p>
-          <Link to="/" className="text-gray-500 hover:text-white uppercase border-b border-gray-500 hover:border-white">
-            GO HOME
-          </Link>
+        <div className="flex flex-col items-center justify-center py-32 px-4 text-center">
+          <p className="text-white text-xl mb-6 uppercase">{error}</p>
+          <div className="flex flex-wrap gap-4 justify-center">
+            <Link to="/discover" className="bg-white text-black px-8 py-3 font-bold uppercase hover:bg-gray-200 transition">
+              BROWSE LINEUPS
+            </Link>
+            <Link to="/" className="border-2 border-white px-8 py-3 font-bold uppercase hover:bg-white hover:text-black transition">
+              GO HOME
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -189,28 +219,28 @@ export default function ViewLineup() {
                     className={`py-4 ${index < lineup.artists.length - 1 ? 'border-b border-white/30' : ''}`}
                   >
                     <div className="flex items-center gap-4">
-                      <span className="text-gray-500 font-bold w-8">{String(index + 1).padStart(2, '0')}</span>
+                      <span className="text-gray-500 font-bold w-8 shrink-0">{String(index + 1).padStart(2, '0')}</span>
                       {artist.artist_image && (
                         <img
                           src={artist.artist_image}
                           alt={artist.artist_name}
-                          className={`object-cover border border-white ${
+                          className={`object-cover border border-white shrink-0 ${
                             isHeadliner ? 'w-16 h-16' : 'w-12 h-12'
                           }`}
                         />
                       )}
-                      <div className="flex items-baseline gap-2">
+                      <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1 min-w-0">
                         {artist.artist_spotify_url ? (
                           <a
                             href={artist.artist_spotify_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className={`font-bold uppercase tracking-wide hover:underline ${sizeClass}`}
+                            className={`font-bold uppercase tracking-wide hover:underline break-words ${sizeClass}`}
                           >
                             {artist.artist_name}
                           </a>
                         ) : (
-                          <span className={`font-bold uppercase tracking-wide ${sizeClass}`}>
+                          <span className={`font-bold uppercase tracking-wide break-words ${sizeClass}`}>
                             {artist.artist_name}
                           </span>
                         )}
@@ -280,6 +310,26 @@ export default function ViewLineup() {
               DOWNLOAD IMAGE
             </button>
           </div>
+
+          {/* Viral on-ramp: a cold visitor who landed on a shared link gets a
+              clear, account-free invitation to build their own. This is the
+              loop's entry point for inbound traffic. */}
+          {!user && (
+            <div className="mt-8 border-2 border-white p-6 text-center">
+              <p className="text-gray-400 uppercase text-sm tracking-wide mb-1">
+                WANT YOUR OWN STAGE?
+              </p>
+              <p className="text-white font-black uppercase text-2xl mb-4">
+                BUILD A LINEUP IN 60 SECONDS
+              </p>
+              <Link
+                to="/create"
+                className="inline-block bg-white text-black px-8 py-3 font-bold uppercase hover:bg-gray-200 transition"
+              >
+                CREATE YOURS &mdash; NO ACCOUNT NEEDED
+              </Link>
+            </div>
+          )}
 
           <p className="text-center text-gray-600 mt-6 text-sm uppercase">
             BY {lineup.creator_username ? (
