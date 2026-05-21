@@ -81,16 +81,16 @@ export default function Discover() {
 
           {/* Site Stats */}
           {siteStats && (
-            <div className="flex justify-center gap-8 mb-8">
-              <div className="text-center border-2 border-white px-6 py-4">
+            <div className="flex flex-wrap justify-center gap-4 sm:gap-8 mb-8">
+              <div className="text-center border-2 border-white px-4 sm:px-6 py-4">
                 <p className="text-3xl font-bold">{siteStats.total_lineups}</p>
                 <p className="text-gray-500 text-sm uppercase">LINEUPS</p>
               </div>
-              <div className="text-center border-2 border-white px-6 py-4">
+              <div className="text-center border-2 border-white px-4 sm:px-6 py-4">
                 <p className="text-3xl font-bold">{siteStats.unique_artists}</p>
                 <p className="text-gray-500 text-sm uppercase">ARTISTS</p>
               </div>
-              <div className="text-center border-2 border-white px-6 py-4">
+              <div className="text-center border-2 border-white px-4 sm:px-6 py-4">
                 <p className="text-3xl font-bold">{siteStats.total_users}</p>
                 <p className="text-gray-500 text-sm uppercase">USERS</p>
               </div>

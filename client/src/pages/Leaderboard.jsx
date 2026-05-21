@@ -94,8 +94,8 @@ export default function Leaderboard() {
                         </div>
                       )}
 
-                      <div className="flex-1">
-                        <h3 className="text-xl font-bold uppercase group-hover:text-gray-300 transition">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-xl font-bold uppercase group-hover:text-gray-300 transition truncate">
                           {artist.artist_name}
                         </h3>
                         <div className="flex items-center gap-4 text-sm text-gray-500 uppercase">
@@ -105,11 +105,11 @@ export default function Leaderboard() {
                         </div>
                       </div>
 
-                      <div className="text-xs font-bold text-gray-500 uppercase border border-white/30 px-3 py-1">
+                      <div className="hidden sm:block shrink-0 text-xs font-bold text-gray-500 uppercase border border-white/30 px-3 py-1">
                         {getPositionLabel(artist.avg_position)}
                       </div>
 
-                      <div className="text-gray-500 group-hover:text-white transition font-bold">
+                      <div className="shrink-0 text-gray-500 group-hover:text-white transition font-bold">
                         &rarr;
                       </div>
                     </div>
