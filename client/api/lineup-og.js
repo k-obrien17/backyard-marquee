@@ -68,14 +68,15 @@ export default async function handler(req, res) {
     : `A dream concert lineup by @${creator}.`;
   const desc = escapeHtml(lineup.description || fallbackDesc);
 
-  const image = artists[0]?.artist_image ? escapeHtml(artists[0].artist_image) : null;
-  const imageMeta = image
-    ? `
-    <meta property="og:image" content="${image}" />
-    <meta name="twitter:image" content="${image}" />
-    <meta name="twitter:card" content="summary_large_image" />`
-    : `
-    <meta name="twitter:card" content="summary" />`;
+  // Use the generated 1200x630 poster card (api/og-image) as the share image
+  // rather than a single artist thumbnail, so every unfurl shows the full lineup.
+  const ogImage = `${SITE_BASE}/api/og-image?id=${id}`;
+  const imageMeta = `
+    <meta property="og:image" content="${ogImage}" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:image" content="${ogImage}" />
+    <meta name="twitter:card" content="summary_large_image" />`;
 
   const tags = Array.isArray(lineup.tags) ? lineup.tags.filter(Boolean) : [];
 
