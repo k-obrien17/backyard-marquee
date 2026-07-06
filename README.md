@@ -42,6 +42,10 @@ It combines artist search, lineup creation, comments, likes, leaderboard views, 
 - Signed-in users can create and manage their own lineups.
 - The app also supports guest creation for quick lineup drafts.
 
+## Public Repo Notes
+
+This is a public demo/product repo. Do not commit `.env` files, real API keys, OAuth secrets, database tokens, private user exports, logs, or moderation/admin data.
+
 ## Local Development
 
 The project uses separate `client/` and `server/` apps.
@@ -82,10 +86,3 @@ PORT=3001
 ```bash
 VITE_API_URL=https://backyard-marquee-api.onrender.com/api
 ```
-
-## Notes
-
-- The frontend lives on Vercel.
-- The API lives on Render.
-- OG preview rendering is handled with crawler-specific routing.
-- If you change the API port locally, update the Vite proxy.

@@ -6,6 +6,7 @@
 !CLAUDE.md
 !AGENTS.md
 !README.md
+!SECURITY.md
 !RUNBOOK.md
 !.claude/
 .claude/*
@@ -27,3 +28,6 @@ node_modules/
 dist/
 .vercel
 .env*.local
+*.log
+.env.local
+.next/
