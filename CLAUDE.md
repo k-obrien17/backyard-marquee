@@ -1,7 +1,5 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
 ## Positioning
 
 Backyard Marquee is a concert lineup builder: users create, share, and discuss 5-artist bills, with Spotify-backed artist search and social features (comments, likes, leaderboards). This directory is the **public-facing checkout**: it shares its GitHub remote with `backyard-marquee` (the internal working copy, which also carries GSD planning docs, audits, and a HANDOFF.md), but its own recent history is public-repo hygiene work rather than feature work. When in doubt, treat this directory as the one that should stay safe to make public: no internal planning docs, no secrets, no `.env` files.
